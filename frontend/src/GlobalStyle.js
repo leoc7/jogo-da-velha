@@ -6,6 +6,7 @@ export default createGlobalStyle`
         height: 100%;
         font-family: 'Ubuntu';
         -webkit-font-smoothing: antialiased;
+        background: #f2f2f2;
     }
 
     * {
@@ -19,7 +20,7 @@ export default createGlobalStyle`
         --shimmer0: #5b5b5b;
         --shimmer1: #8e8e8e;
 
-        --gray0: #ccc;
+        --gray0: #333;
         --gray1: #666;
         --gray2: #999;
     }

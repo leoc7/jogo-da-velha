@@ -6,7 +6,6 @@ export const Container = styled.div`
     top: 50%;
     transform: translateX(-50%) translateY(-50%);
     width: 400px;
-    height: 600px;
     background: white;
     box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
@@ -16,26 +15,21 @@ export const Container = styled.div`
         font-size: 24px;
         color: var(--gray1);
     }
-`;
 
-export const RoomList = styled.div`
-    margin-top: 20px;
-    height: 480px;
-    overflow-y: auto;
-    width: 100%;
-`;
+    & form {
+        display: flex;
+        flex-direction: column;
+        margin-top: 20px;
+        margin: 10px 0;
+    }
 
-export const RoomItem = styled.div`
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    font-weight: 400;
-    font-size: 14px;
-    color: var(--gray1);
-
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-    padding-bottom: 15px;
+    & form label {
+        font-size: 12px;
+        text-transform: uppercase;
+        color: var(--gray1);
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
 
     & button {
         background: #c617e1;
@@ -47,6 +41,7 @@ export const RoomItem = styled.div`
         color: white;
         cursor: pointer;
         font-size: 14px;
+        width: 100%;
 
         &:hover {
             background: #a900c3;
@@ -54,20 +49,14 @@ export const RoomItem = styled.div`
     }
 `;
 
-export const CreateRoomAnchor = styled.a`
+export const Input = styled.input`
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    padding: 10px;
     color: var(--gray1);
-    font-size: 18px;
-    text-decoration: none;
-    transition: all .2s ease;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    
-    & svg {
-        margin-left: 10px;
-    }
 
-    &:hover {
-        color: var(--gray2);
+    &::placeholder {
+        font-weight: 200;
+        color: #c7c7c7;
     }
 `;
