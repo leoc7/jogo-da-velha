@@ -20,7 +20,7 @@ export const Container = styled.div`
         display: flex;
         flex-direction: column;
         margin-top: 20px;
-        margin: 10px 0;
+        margin-top: 10px;
     }
 
     & form label {
@@ -41,6 +41,7 @@ export const Container = styled.div`
         color: white;
         cursor: pointer;
         font-size: 14px;
+        margin-top: 10px;
         width: 100%;
 
         &:hover {
