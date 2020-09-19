@@ -5,7 +5,11 @@ export default class PlayerManager {
 
     add(client) {
         this.players[client.id] = new Player(client);
-        console.log(this.players);
+        console.log(this.keys());
+    }
+
+    get(clientId) {
+        return this.players[clientId];
     }
 
     remove(clientId) {
@@ -14,5 +18,9 @@ export default class PlayerManager {
 
     count() {
         return Object.keys(this.players).length;
+    }
+
+    keys() {
+        return Object.keys(this.players);
     }
 }

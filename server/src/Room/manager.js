@@ -5,6 +5,7 @@ export default class RoomManager {
     rooms = {
         UCZYW: new Room({
             name: 'Vem ver minha sala',
+            key: 'UCZYW'
         }),
     };
 
@@ -29,13 +30,8 @@ export default class RoomManager {
 
     listObjects() {
         const list = [];
-        Object.entries(this.rooms).forEach(([roomKey, room]) => {
-            list.push({
-                key: roomKey,
-                name: room.name,
-                isWaiting: room.isWaiting,
-                count: room.players.count(),
-            });
+        Object.entries(this.rooms).forEach(([, room]) => {
+            list.push(room.toObject());
         });
 
         return list;

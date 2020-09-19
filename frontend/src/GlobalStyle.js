@@ -17,9 +17,6 @@ export default createGlobalStyle`
     }
 
     :root {
-        --shimmer0: #5b5b5b;
-        --shimmer1: #8e8e8e;
-
         --gray0: #333;
         --gray1: #666;
         --gray2: #999;

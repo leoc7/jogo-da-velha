@@ -6,7 +6,6 @@ export const Container = styled.div`
     top: 50%;
     transform: translateX(-50%) translateY(-50%);
     width: 600px;
-    height: 600px;
     background: white;
     box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
@@ -23,8 +22,9 @@ export const GameGrid = styled.div`
     grid-template-rows: repeat(3, 1fr);
     grid-template-columns: repeat(3, 1fr);
     grid-gap: 20px;
-    width: 100%;
-    height: 100%;
+    width: 560px;
+    height: 530px;
+    margin-top: 20px;
 `;
 
 export const GameSection = styled.div`
@@ -44,4 +44,25 @@ export const GameSection = styled.div`
             : css`
                   color: red;
               `}
+`;
+
+export const Details = styled.div`
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+
+    & a {
+        display: flex;
+        align-items: center;
+        transition: all .2s ease;
+        cursor: pointer;
+        
+        & svg{
+            margin-right: 10px;
+        }
+    }
+
+    & a:hover {
+        color: var(--gray2);
+    }
 `;

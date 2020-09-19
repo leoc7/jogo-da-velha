@@ -9,7 +9,6 @@ class RoomController {
             this.create(data)
                 .then(roomKey => {
                     client.emit('room-creation-successful', roomKey);
-                    this.join(roomKey, client);
                     this.rooms.get(roomKey, room =>
                         server.emit('new-room', room.toObject())
                     );
@@ -22,12 +21,14 @@ class RoomController {
         client.on('join-room', key => {
             this.join(key, client)
                 .then(() => {
+                    client.emit('my-id', client.id)
                     client.emit('room-join-successful', key);
                     this.rooms.get(key, room => {
                         client.broadcast.emit('room-player-count-update', {
                             key,
                             count: room.players.count(),
                         });
+                        room.checkStart();
                     });
                 })
                 .catch(err => {
@@ -76,6 +77,7 @@ class RoomController {
                 } else {
                     room.players.add(client);
                     client.room = key;
+                    console.log('entrei na sala', key);
                     client.join(key);
                 }
             });
