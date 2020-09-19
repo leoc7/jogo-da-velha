@@ -15,6 +15,7 @@ export default class Room {
             key: this.key,
             name: this.name,
             isWaiting: this.isWaiting,
+            count: this.players.count(),
         };
     }
 }

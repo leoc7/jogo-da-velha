@@ -9,12 +9,29 @@ class RoomController {
             this.create(data)
                 .then(roomKey => {
                     client.emit('room-creation-successful', roomKey);
+                    this.join(roomKey, client);
                     this.rooms.get(roomKey, room =>
                         server.emit('new-room', room.toObject())
                     );
                 })
                 .catch(err => {
                     client.emit('room-creation-error', err);
+                });
+        });
+
+        client.on('join-room', key => {
+            this.join(key, client)
+                .then(() => {
+                    client.emit('room-join-successful', key);
+                    this.rooms.get(key, room => {
+                        client.broadcast.emit('room-player-count-update', {
+                            key,
+                            count: room.players.count(),
+                        });
+                    });
+                })
+                .catch(err => {
+                    client.emit('room-join-error', err);
                 });
         });
 
@@ -25,6 +42,10 @@ class RoomController {
         client.on('disconnect', () => {
             this.rooms.get(client.room, room => {
                 room.players.remove(client.id);
+                server.emit('room-player-count-update', {
+                    key: client.room,
+                    count: room.players.count(),
+                });
             });
         });
     }
@@ -42,6 +63,24 @@ class RoomController {
             const roomKey = this.rooms.create(data);
 
             resolve(roomKey);
+        });
+    }
+
+    join(key, client) {
+        return new Promise((resolve, reject) => {
+            if (!this.rooms.exists(key)) reject('A sala não existe');
+
+            this.rooms.get(key, room => {
+                if (room.players.count() == 2) {
+                    reject('A sala está cheia');
+                } else {
+                    room.players.add(client);
+                    client.room = key;
+                    client.join(key);
+                }
+            });
+
+            resolve();
         });
     }
 }

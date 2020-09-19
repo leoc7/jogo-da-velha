@@ -15,8 +15,12 @@ export default class RoomManager {
         return roomKey;
     }
 
+    exists(roomKey) {
+        return this.rooms.hasOwnProperty(roomKey);
+    }
+
     get(roomKey, cb) {
-        if (!this.rooms.hasOwnProperty(roomKey)) {
+        if (!this.exists(roomKey)) {
             return;
         }
 
@@ -29,9 +33,10 @@ export default class RoomManager {
             list.push({
                 key: roomKey,
                 name: room.name,
-                isWaiting: room.isWaiting
-            })
-        })
+                isWaiting: room.isWaiting,
+                count: room.players.count(),
+            });
+        });
 
         return list;
     }
