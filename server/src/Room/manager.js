@@ -1,16 +1,26 @@
-import { v4 as generateUUID } from 'uuid';
 import Room from '.';
 
 export default class RoomManager {
     rooms = {
         UCZYW: new Room({
-            name: 'Vem ver minha sala',
-            key: 'UCZYW'
+            name: 'Minha sala',
+            key: 'UCZYW',
         }),
     };
 
+    generateKey() {
+        const CHARS = 'ABCDEFGHIJLKMNOPQRSTUVWXYZ0123456789';
+        let result = '';
+
+        for (let i = 0; i < 5; i++) {
+            result += CHARS.charAt(Math.floor(Math.random() * CHARS.length));
+        }
+
+        return result;
+    }
+
     create(data) {
-        const roomKey = generateUUID();
+        const roomKey = this.generateKey();
         this.rooms[roomKey] = new Room({ ...data, key: roomKey });
 
         return roomKey;
