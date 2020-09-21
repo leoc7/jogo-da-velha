@@ -21,7 +21,7 @@ class RoomController {
         client.on('join-room', key => {
             this.join(key, client)
                 .then(() => {
-                    client.emit('my-id', client.id)
+                    client.emit('my-id', client.id);
                     client.emit('room-join-successful', key);
                     this.rooms.get(key, room => {
                         client.broadcast.emit('room-player-count-update', {
@@ -36,8 +36,35 @@ class RoomController {
                 });
         });
 
+        client.on('leave-room', () => {
+            const key = client.room;
+
+            if (!key) return;
+
+            this.leave(key, client).then(() => {
+                this.rooms.get(key, room => {
+                    client.broadcast.emit('room-player-count-update', {
+                        key,
+                        count: room.players.count(),
+                    });
+                });
+            });
+        });
+
         client.on('get-room-list', () => {
             client.emit('room-list', this.rooms.listObjects());
+        });
+
+        client.on('grid-sector-click', ({ i, j }) => {
+            this.rooms.get(client.room, room => {
+                room.updateSector(client.id, i, j);
+            });
+        });
+
+        client.on('restart-room', () => {
+            this.rooms.get(client.room, room => {
+                room.restart();
+            });
         });
 
         client.on('disconnect', () => {
@@ -77,9 +104,20 @@ class RoomController {
                 } else {
                     room.players.add(client);
                     client.room = key;
-                    console.log('entrei na sala', key);
                     client.join(key);
                 }
+            });
+
+            resolve();
+        });
+    }
+
+    leave(key, client) {
+        return new Promise(resolve => {
+            this.rooms.get(key, room => {
+                room.players.remove(client.id);
+                delete client['room'];
+                client.leave(key);
             });
 
             resolve();

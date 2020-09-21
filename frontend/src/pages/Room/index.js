@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, GameGrid, GameSection, Details } from './styles';
-import { MdKeyboardBackspace } from 'react-icons/md';
+import { MdKeyboardBackspace, MdCached } from 'react-icons/md';
 import server from '../../services/server';
 
 const Status = {
@@ -9,7 +9,7 @@ const Status = {
     FINISHED: 2,
 };
 
-export default function Room({ match }) {
+export default function Room({ history, match }) {
     const [grid, setGrid] = useState([
         ['', '', ''],
         ['', '', ''],
@@ -19,13 +19,39 @@ export default function Room({ match }) {
     const [playerTurn, setPlayerTurn] = useState(null);
     const [isMyTurn, setMyTurn] = useState(null);
     const [myId, setMyId] = useState(null);
+    const [winner, setWinner] = useState(null);
+    const [gameOver, setGameOver] = useState(false);
 
-    function handleClick(i, j, value) {
-        if(!isMyTurn) return;
+    function handleClick(i, j) {
+        if (!isMyTurn) return;
 
-        const gridCopy = grid.slice(0);
-        gridCopy[i][j] = value;
-        setGrid(gridCopy);
+        server.emit('grid-sector-click', { i, j });
+    }
+
+    function handleRestart() {
+        server.emit('restart-room');
+    }
+
+    function handleLeave() {
+        server.emit('leave-room');
+        history.push('/');
+    }
+
+    function updateGrid(i, j, value) {
+        setGrid(oldGrid => {
+            const gridCopy = oldGrid.slice(0);
+            gridCopy[i][j] = value;
+
+            return gridCopy;
+        });
+    }
+
+    function resetGrid() {
+        setGrid([
+            ['', '', ''],
+            ['', '', ''],
+            ['', '', ''],
+        ]);
     }
 
     function setupServer() {
@@ -36,7 +62,16 @@ export default function Room({ match }) {
         });
 
         server.on('grid-sector-update', ({ i, j, value }) => {
-            console.log(i, j, value);
+            updateGrid(i, j, value);
+        });
+
+        server.on('room-restart', () => {
+            resetGrid();
+            setGameOver(false);
+        });
+
+        server.on('room-restart-error', () => {
+            alert('Não foi possível reiniciar a sala!');
         });
 
         server.on('room-status', status => {
@@ -50,6 +85,22 @@ export default function Room({ match }) {
                 return id;
             });
         });
+
+        server.on('room-player-won', playerId => {
+            setWinner(playerId);
+            setMyTurn(false);
+        });
+
+        server.on('room-game-over', () => {
+            setGameOver(true);
+        });
+
+        server.on('room-join-successful', key => {});
+
+        server.on('room-join-error', err => {
+            alert('Não foi possível entrar na sala: ', err);
+            history.push('/')
+        });
     }
 
     useEffect(setupServer, []);
@@ -62,7 +113,8 @@ export default function Room({ match }) {
                     <React.Fragment key={'row' + i}>
                         {row.map((col, j) => (
                             <GameSection
-                                onClick={() => handleClick(i, j, 'X')}
+                                value={col}
+                                onClick={() => handleClick(i, j)}
                                 key={'col' + j}>
                                 {col}
                             </GameSection>
@@ -72,24 +124,39 @@ export default function Room({ match }) {
             </GameGrid>
             <Details>
                 <span>
-                    Status:
                     {status == Status.WAITING && (
                         <strong> Aguardando jogadores... </strong>
                     )}
                     {status == Status.PLAYING && (
                         <>
                             {isMyTurn ? (
-                                <strong>É a sua vez!</strong>
+                                <strong> É a sua vez!</strong>
                             ) : (
-                                <strong>É a vez do oponente!</strong>
+                                <strong> É a vez do oponente!</strong>
                             )}
                         </>
                     )}
                     {status == Status.FINISHED && (
-                        <strong> O jogo acabou! </strong>
+                        <>
+                            <strong>
+                                O jogo acabou.{' '}
+                                {gameOver ? (
+                                    'Deu velha!'
+                                ) : (
+                                    <>
+                                        {winner == myId
+                                            ? 'Você ganhou! '
+                                            : 'Você perdeu! '}
+                                    </>
+                                )}
+                            </strong>
+                            <a onClick={handleRestart}>
+                                <MdCached /> Jogar Novamente
+                            </a>
+                        </>
                     )}
                 </span>
-                <a>
+                <a onClick={handleLeave}>
                     <MdKeyboardBackspace /> Sair da sala
                 </a>
             </Details>

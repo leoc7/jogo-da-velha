@@ -13,8 +13,8 @@ export default class Room {
     playerTurn = null;
     playerX = null;
     playerO = null;
-
     status = Status.WAITING;
+    grid = null;
 
     constructor({ name, key }) {
         this.name = name;
@@ -45,17 +45,14 @@ export default class Room {
     updateStatus(status) {
         this.status = status;
         this.emit('room-status', status);
-        console.log('status atualziado na sala', this.key);
-    }
-
-    checkStart() {
-        if (this.players.count() == 2) {
-            this.start();
-        }
     }
 
     start() {
-        console.log('começou');
+        this.grid = [
+            ['', '', ''],
+            ['', '', ''],
+            ['', '', ''],
+        ];
         const playerKeys = this.players.keys();
 
         this.playerX = playerKeys[0];
@@ -67,5 +64,137 @@ export default class Room {
         this.emit('room-player-turn', this.playerTurn);
     }
 
-    tick() {}
+    checkStart() {
+        if (this.players.count() == 2) {
+            this.start();
+            return true;
+        }
+
+        return false;
+    }
+
+    checkWin() {
+        const grid = this.grid;
+
+        for (let i = 0; i < 3; i++) {
+            let rowEqual = true;
+            let ref = grid[i][0];
+
+            if (ref !== '') {
+                for (let j = 1; j < 3; j++) {
+                    if (grid[i][j] !== ref) rowEqual = false;
+                }
+            } else {
+                rowEqual = false;
+            }
+
+            if (rowEqual) {
+                this.finish(ref);
+                return true;
+            }
+
+            let colEqual = true;
+            ref = grid[0][i];
+
+            if (ref !== '') {
+                for (let j = i; j < 3; j++) {
+                    if (grid[j][i] !== ref) colEqual = false;
+                }
+            } else {
+                colEqual = false;
+            }
+
+            if (colEqual) {
+                this.finish(ref);
+                return true;
+            }
+        }
+
+        if (grid[0][0] !== '') {
+            if (grid[0][0] === grid[1][1] && grid[0][0] === grid[2][2]) {
+                this.finish(grid[0][0]);
+                return true;
+            }
+        }
+        if (grid[0][2] !== '') {
+            if (grid[0][2] === grid[1][1] && grid[0][2] == grid[2][0]) {
+                this.finish(grid[0][2]);
+                return true;
+            }
+        }
+
+        let gameOver = true;
+
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                if (grid[i][j] === '') gameOver = false;
+            }
+        }
+
+        if (gameOver) {
+            this.finishGameOver();
+            return true;
+        }
+
+        return false;
+    }
+
+    finishGameOver() {
+        this.updateStatus(Status.FINISHED);
+        this.emit('room-game-over');
+    }
+
+    finish(value) {
+        let playerId = this.getPlayerIdByValue(value);
+
+        this.updateStatus(Status.FINISHED);
+        this.emit('room-player-won', playerId);
+    }
+
+    restart() {
+        if (this.checkStart()) this.emit('room-restart');
+        else this.emit('room-restart-error');
+    }
+
+    getPlayerIdByValue(value) {
+        if (value === 'X') return this.playerX;
+
+        return this.playerO;
+    }
+
+    getPlayerValue(playerId) {
+        if (this.playerX == playerId) {
+            return 'X';
+        }
+
+        return 'O';
+    }
+
+    updateSector(playerId, i, j) {
+        const value = this.getPlayerValue(playerId);
+
+        if (this.playerTurn == playerId) {
+            this.grid[i][j] = value;
+        }
+
+        this.emit('grid-sector-update', {
+            i,
+            j,
+            value,
+        });
+
+        if (!this.checkWin()) {
+            this.nextPlayer();
+        }
+    }
+
+    nextPlayer() {
+        if (this.playerX == this.playerTurn) {
+            this.playerTurn = this.playerO;
+        } else {
+            this.playerTurn = this.playerX;
+        }
+
+        this.emit('room-player-turn', this.playerTurn);
+    }
 }

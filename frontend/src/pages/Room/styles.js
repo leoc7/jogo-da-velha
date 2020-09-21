@@ -37,7 +37,7 @@ export const GameSection = styled.div`
     cursor: pointer;
 
     ${p =>
-        p.player == 'me'
+        p.value == 'O'
             ? css`
                   color: blue;
               `
@@ -58,7 +58,7 @@ export const Details = styled.div`
         cursor: pointer;
         
         & svg{
-            margin-right: 10px;
+            margin-right: 6px;
         }
     }
 

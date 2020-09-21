@@ -29,18 +29,10 @@ export default function Dashboard({ history }) {
                 })
             );
         });
-
-        server.on('room-join-successful', key => {
-            history.push(`/room/${key}`);
-        });
-
-        server.on('room-join-error', err => {
-            alert(err);
-        });
     }, []);
 
     function joinRoom(key) {
-        server.emit('join-room', key);
+        history.push(`/room/${key}`);
     }
 
     return (
@@ -49,7 +41,9 @@ export default function Dashboard({ history }) {
             <RoomList>
                 {rooms.map(room => (
                     <RoomItem key={room.key}>
-                        <span>[{room.count}/2] {room.name}</span>
+                        <span>
+                            [{room.count}/2] {room.name}
+                        </span>
                         <button onClick={() => joinRoom(room.key)}>
                             Entrar
                         </button>
